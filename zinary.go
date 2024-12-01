@@ -51,7 +51,7 @@ func httpClient() *http.Client {
 	return client
 }
 
-func (c client) makeRequest(method string, path string, body io.Reader) ([]byte, error) {
+func (c client) makeRequest(method string, path string, body any) ([]byte, error) {
 	var buf io.ReadWriter
 	if body != nil {
 		buf = &bytes.Buffer{}
@@ -65,7 +65,7 @@ func (c client) makeRequest(method string, path string, body io.Reader) ([]byte,
 		return nil, err
 	}
 
-	req, err := http.NewRequest(method, parsedURL.String(), body)
+	req, err := http.NewRequest(method, parsedURL.String(), buf)
 	if err != nil {
 		return nil, fmt.Errorf("could not create request: %w", err)
 	}
