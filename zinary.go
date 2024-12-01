@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	BaseURL = ""
+	BaseURL = "https://openapi.zinari.io/v1"
 
 	// DefaultHTTPTimeout is the default timeout on the http client
 	DefaultHTTPTimeout = 60 * time.Second
