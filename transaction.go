@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type Transaction struct {
@@ -110,4 +111,90 @@ func (c client) GetTransaction(id string) (GetTransactionResponse, error) {
 	return resp, nil
 }
 
-func (c client) ListTransactions() ([]GetTransactionResponse, error) {}
+type ListTransactionsResponse struct {
+	LastPage     int                           `json:"lastPage"`
+	TotalRecords int                           `json:"totalRecords"`
+	CurrentPage  int                           `json:"currentPage"`
+	HasMorePages bool                          `json:"hasMorePages"`
+	Data         []ListTransactionResponseData `json:"data"`
+}
+
+type ListTransactionResponseData struct {
+	ID                      string  `json:"id"`
+	Type                    string  `json:"type"`
+	CreatedAt               string  `json:"createdAt"`
+	Cryptocurrency          string  `json:"cryptocurrency"`
+	CryptocurrencyAmount    float64 `json:"cryptocurrencyAmount"`
+	FiatAmount              int64   `json:"fiatAmount"`
+	FiatCurrency            string  `json:"fiatCurrency"`
+	AmountReceived          float64 `json:"amountReceived"`
+	BlockchainTransactionID string  `json:"blockchainTransactionId"`
+	Status                  string  `json:"status"`
+	FiatTax                 int64   `json:"fiatTax"`
+	FiatFee                 int64   `json:"fiatFee"`
+	CryptocurrencyTax       int64   `json:"cryptocurrencyTax"`
+	CryptocurrencyFee       int64   `json:"cryptocurrencyFee"`
+}
+
+type ListTransactionsRequest struct {
+	Limit *int
+	Page  *int
+}
+
+// ListTransactionsProd
+//
+// This endpoint returns a paginated list of all transactions created when your app was in production mode.
+// Transactions created in development mode (which are simulated or fake) will not appear in this list.
+func (c client) ListTransactionsProd(l ListTransactionsRequest) (ListTransactionsResponse, error) {
+	var resp ListTransactionsResponse
+	if l.Limit == nil {
+		limit := 50
+		l.Limit = &limit
+	}
+
+	if l.Page == nil {
+		page := 1
+		l.Page = &page
+	}
+
+	queryParams := url.Values{}
+	queryParams.Add("limit", fmt.Sprintf("%d", *l.Limit))
+	queryParams.Add("page", fmt.Sprintf("%d", *l.Page))
+
+	response, err := c.makeRequest(http.MethodGet, fmt.Sprintf("/transactions?%s", queryParams.Encode()), nil)
+	if err != nil {
+		_ = json.Unmarshal(response, &resp)
+		return resp, err
+	}
+	_ = json.Unmarshal(response, &resp)
+	return resp, nil
+}
+
+// ListTransactionsDev
+//
+// This endpoint returns a paginated list of all transactions created when your app was in development mode.
+// Transactions created in production mode (which are real transactions) will not appear in this list.
+func (c client) ListTransactionsDev(l ListTransactionsRequest) (ListTransactionsResponse, error) {
+	var resp ListTransactionsResponse
+	if l.Limit == nil {
+		limit := 50
+		l.Limit = &limit
+	}
+
+	if l.Page == nil {
+		page := 1
+		l.Page = &page
+	}
+
+	queryParams := url.Values{}
+	queryParams.Add("limit", fmt.Sprintf("%d", *l.Limit))
+	queryParams.Add("page", fmt.Sprintf("%d", *l.Page))
+
+	response, err := c.makeRequest(http.MethodGet, fmt.Sprintf("/transactions-dev?%s", queryParams.Encode()), nil)
+	if err != nil {
+		_ = json.Unmarshal(response, &resp)
+		return resp, err
+	}
+	_ = json.Unmarshal(response, &resp)
+	return resp, nil
+}
