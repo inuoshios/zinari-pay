@@ -23,7 +23,7 @@ type client struct {
 	baseURL *url.URL
 }
 
-func NewClient(apiKey string) *client {
+func ZinariPayClient(apiKey string) *client {
 	parseUrl, _ := url.Parse(BaseURL)
 	return &client{
 		APIKey:  apiKey,
