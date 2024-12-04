@@ -23,7 +23,7 @@ type Transaction struct {
 	Details map[string]any `json:"details"`
 }
 
-type TransactionResponse struct {
+type transactionResponse struct {
 	ID                      string  `json:"id"`
 	FiatTax                 int64   `json:"fiatTax"`
 	FiatFee                 int64   `json:"fiatFee"`
@@ -49,8 +49,8 @@ type TransactionResponse struct {
 // Timeout and Cancellation: If no payment is made within 10 minutes, the transaction will automatically transition to Cancelled.
 // After this, payments made to the supplied address will result in lost funds.
 // The required arguments for this endpoint are cryptocurrency, fiatAmount, and notificationEmailAddress.
-func (c client) CreateTransaction(body Transaction) (TransactionResponse, error) {
-	var resp TransactionResponse
+func (c client) CreateTransaction(body Transaction) (transactionResponse, error) {
+	var resp transactionResponse
 
 	response, err := c.makeRequest(http.MethodPost, "/create-transaction", &body)
 	if err != nil {
@@ -61,7 +61,7 @@ func (c client) CreateTransaction(body Transaction) (TransactionResponse, error)
 	return resp, nil
 }
 
-type GetTransactionResponse struct {
+type getTransactionResponse struct {
 	ID                      string         `json:"id"`
 	UniqueID                string         `json:"uniqueId"`
 	Status                  string         `json:"status"`
@@ -99,10 +99,10 @@ type GetTransactionResponse struct {
 // - Cancelled: The payment window expired without receiving a payment.
 //
 // - Failed: The transaction failed from the user's end after it was broadcast to the blockchain.
-func (c client) GetTransaction(id string) (GetTransactionResponse, error) {
-	var resp GetTransactionResponse
+func (c client) GetTransaction(transactionID string) (getTransactionResponse, error) {
+	var resp getTransactionResponse
 
-	response, err := c.makeRequest(http.MethodGet, fmt.Sprintf("/transaction/%s", id), nil)
+	response, err := c.makeRequest(http.MethodGet, fmt.Sprintf("/transaction/%s", transactionID), nil)
 	if err != nil {
 		_ = json.Unmarshal(response, &resp)
 		return resp, err
@@ -111,15 +111,15 @@ func (c client) GetTransaction(id string) (GetTransactionResponse, error) {
 	return resp, nil
 }
 
-type ListTransactionsResponse struct {
+type listTransactionsResponse struct {
 	LastPage     int                           `json:"lastPage"`
 	TotalRecords int                           `json:"totalRecords"`
 	CurrentPage  int                           `json:"currentPage"`
 	HasMorePages bool                          `json:"hasMorePages"`
-	Data         []ListTransactionResponseData `json:"data"`
+	Data         []listTransactionResponseData `json:"data"`
 }
 
-type ListTransactionResponseData struct {
+type listTransactionResponseData struct {
 	ID                      string  `json:"id"`
 	Type                    string  `json:"type"`
 	CreatedAt               string  `json:"createdAt"`
@@ -145,8 +145,8 @@ type ListTransactionsRequest struct {
 //
 // This endpoint returns a paginated list of all transactions created when your app was in production mode.
 // Transactions created in development mode (which are simulated or fake) will not appear in this list.
-func (c client) ListTransactionsProd(l ListTransactionsRequest) (ListTransactionsResponse, error) {
-	var resp ListTransactionsResponse
+func (c client) ListTransactionsProd(l ListTransactionsRequest) (listTransactionsResponse, error) {
+	var resp listTransactionsResponse
 	if l.Limit == nil {
 		limit := 50
 		l.Limit = &limit
@@ -174,8 +174,8 @@ func (c client) ListTransactionsProd(l ListTransactionsRequest) (ListTransaction
 //
 // This endpoint returns a paginated list of all transactions created when your app was in development mode.
 // Transactions created in production mode (which are real transactions) will not appear in this list.
-func (c client) ListTransactionsDev(l ListTransactionsRequest) (ListTransactionsResponse, error) {
-	var resp ListTransactionsResponse
+func (c client) ListTransactionsDev(l ListTransactionsRequest) (listTransactionsResponse, error) {
+	var resp listTransactionsResponse
 	if l.Limit == nil {
 		limit := 50
 		l.Limit = &limit

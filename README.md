@@ -15,3 +15,5 @@
 ```sh
 go install github.com/inuoshios/zinary-pay
 ```
+
+### If you use am, na you sabi, lmfao.
